@@ -54,7 +54,7 @@ func NewRouter() *echo.Echo {
 ```
 
 
-## 📑 Ioc.Registry : Constructor Registration
+## 📑 Ioc.Registry : Constructor Registration Rules
 
 The Ioc.Registry(vertex, edges...) function in our Inversion of Control (IoC) system plays a critical role in managing and registering dependencies. This function is specifically designed to register constructors that meet certain criteria regarding the types of values they return.
 
