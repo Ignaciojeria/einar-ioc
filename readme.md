@@ -86,7 +86,7 @@ func main() {
 ## 👨‍💻 HTTP Handler Registration
 In this section, we register the HTTP Handler using the einar-ioc framework. The `newGetExampleHandler` function is registered as a vertex in the dependency graph. Additionally, `router.NewRouter` is specified as a dependency of `newGetExampleHandler` and is represented as an edge in the graph. This setup signifies that `router.NewRouter` will be injected as a dependency into `newGetExampleHandler` during the instantiation of the handler.
 
-####  🔍 Create your router file
+####  🔍 Create your first handler
 Navigate to the /app/handler folder. Inside this folder, we will create get_example_handler.go
 ```bash
 /app/handler
