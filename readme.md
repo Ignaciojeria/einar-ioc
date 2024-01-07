@@ -10,10 +10,23 @@ To install ioc, use the following command:
 
 The dependencies in the framework are represented as a Directed Acyclic Graph (DAG) where:
 
-1. Constructors are vertices.
-2. Dependencies are edges.
-3. The graph is topologically ordered.
-4. Dependency loading starts from descendant nodes and proceeds to their ancestors.
+1. Dependencies are regitered using ioc.Registry(vertex,...edges) function.
+2. Constructors are vertices.
+3. Dependencies are edges.
+4. The graph is topologically ordered.
+5. Dependency loading starts from descendant nodes and proceeds to their ancestors.
+
+## 📑 Ioc.Registry : Constructor Registration
+
+#### 🔍 Overview
+The Ioc.Registry(vertex, edges...) function in our Inversion of Control (IoC) system plays a critical role in managing and registering dependencies. This function is specifically designed to register constructors that meet certain criteria regarding the types of values they return.
+
+#### 🔍 Return Type Constraints
+It's important to note that Ioc.Registry can only register constructors that return up to two specific types:
+
+1. Associated Structure of the Constructor: This is the primary type of the object or structure that the constructor is designed to create. It's a mandatory requirement for each constructor to return this type.
+
+2. Error (Optional): Optionally, the constructor can return a second type, which is an error. This return is used to indicate if there was any error during the creation of the object or structure. The inclusion of this return type is optional, but when present, it provides a robust way to handle errors in the creation process.
 
 ## 👨‍💻 Setup
 
@@ -51,15 +64,3 @@ func NewRouter() *echo.Echo {
 	return e
 }
 ```
-
-## 📑 Ioc.Registry : Constructor Registration
-
-#### 🔍 Overview
-The Ioc.Registry(vertex, edges...) function in our Inversion of Control (IoC) system plays a critical role in managing and registering dependencies. This function is specifically designed to register constructors that meet certain criteria regarding the types of values they return.
-
-#### 🔍 Return Type Constraints
-It's important to note that Ioc.Registry can only register constructors that return up to two specific types:
-
-1. Associated Structure of the Constructor: This is the primary type of the object or structure that the constructor is designed to create. It's a mandatory requirement for each constructor to return this type.
-
-2. Error (Optional): Optionally, the constructor can return a second type, which is an error. This return is used to indicate if there was any error during the creation of the object or structure. The inclusion of this return type is optional, but when present, it provides a robust way to handle errors in the creation process.
