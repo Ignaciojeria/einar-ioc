@@ -141,6 +141,11 @@ func main() {
 	r.(*echo.Echo).Start(":8080")
 }
 ```
+#### 🔍 Start application and check Handler
+
+![Hello World Image](/sketching/hello_world.jpeg)
+
+
 
 
 ## 📑 Ioc.Registry : Constructor Registration Rules
