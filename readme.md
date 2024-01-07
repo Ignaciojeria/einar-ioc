@@ -104,13 +104,13 @@ func (h getExampleHandler) handle(c echo.Context) error {
 }
 ```
 
-#### 🔍 handler discovering
+#### 🔍 Handler discovering
 ```go
 package main
 
 import (
 	"log"
-	_ "tutorial/app/handler"
+	_ "tutorial/app/handler" //Required to discover the handler and all its descendants.
 	"tutorial/app/router"
 
 	ioc "github.com/Ignaciojeria/einar-ioc"
