@@ -143,10 +143,9 @@ func main() {
 ```
 #### 🔍 Start application and check Handler
 
-![Hello World Image](/sketching/hello_world.jpeg)
-
-
-
+<div align="center">
+    <img src="/sketching/hello_world.jpeg" width="300" height="200">
+</div>
 
 ## 📑 Ioc.Registry : Constructor Registration Rules
 
