@@ -54,16 +54,6 @@ func Registry(vertex constructor, edges ...constructor) error {
 		errs = append(errs, err)
 		return errors.New("provided constructor is not a function")
 	}
-	var constructorParameterKeys []string
-
-	for i := 0; i < len(edges); i++ {
-		constructorKey, err := getConstructorKey(edges[i])
-		if err != nil {
-			errs = append(errs, err)
-			return err
-		}
-		constructorParameterKeys = append(constructorParameterKeys, constructorKey)
-	}
 
 	id, err := graph.AddVertex(constructorKey)
 	if err != nil {
