@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	_ "tutorial/app/handler"
 	"tutorial/app/router"
 
 	ioc "github.com/Ignaciojeria/einar-ioc"

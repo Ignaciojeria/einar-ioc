@@ -53,7 +53,8 @@ func NewRouter() *echo.Echo {
 }
 ```
 
-#### 🔍 Retrieving the registered router & start the server
+#### 🔍 Retrieving the registered router
+
 ```go
 package main
 
@@ -87,16 +88,11 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// Registers newGetExampleHandler as a constructor in the dependency injection container.
-// It depends on router.NewRouter
 var _ = ioc.Registry(newGetExampleHandler, router.NewRouter)
 
 type getExampleHandler struct {
 }
 
-// newGetExampleHandler is a constructor function for getExampleHandler.
-// It takes a *echo.Echo instance (r) as a parameter (edge in the dependency graph),
-// indicating that it relies on the Echo router (vertex) for its operation.
 func newGetExampleHandler(r *echo.Echo) getExampleHandler {
 	handler := getExampleHandler{}
 	r.GET("/example", handler.handle)
@@ -105,6 +101,28 @@ func newGetExampleHandler(r *echo.Echo) getExampleHandler {
 
 func (h getExampleHandler) handle(c echo.Context) error {
 	return c.String(http.StatusOK, "Mira mamá, sin manos!")
+}
+```
+
+#### 🔍 handler discovering
+```go
+package main
+
+import (
+	"log"
+	_ "tutorial/app/handler"
+	"tutorial/app/router"
+
+	ioc "github.com/Ignaciojeria/einar-ioc"
+	"github.com/labstack/echo/v4"
+)
+
+func main() {
+	if err := ioc.LoadDependencies(); err != nil {
+		log.Fatal(err)
+	}
+	r, _ := ioc.Get(router.NewRouter)
+	r.(*echo.Echo).Start(":8080")
 }
 ```
 
