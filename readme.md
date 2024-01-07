@@ -53,6 +53,28 @@ func NewRouter() *echo.Echo {
 }
 ```
 
+#### 🔍 Retrieving the registered router & start the server
+```go
+package main
+
+import (
+	"log"
+	"tutorial/app/router"
+
+	ioc "github.com/Ignaciojeria/einar-ioc"
+	"github.com/labstack/echo/v4"
+)
+
+func main() {
+	if err := ioc.LoadDependencies(); err != nil {
+		log.Fatal(err)
+	}
+	// Retrieving the registered router & start the server
+	r, _ := ioc.Get(router.NewRouter)
+	r.(*echo.Echo).Start(":8080")
+}
+```
+
 
 ## 📑 Ioc.Registry : Constructor Registration Rules
 
