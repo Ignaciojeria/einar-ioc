@@ -60,7 +60,7 @@ func NewRouter() *echo.Echo {
 }
 ```
 
-#### 🔍 Retrieving the registered router
+#### 🔍 Retrieving the registered router & start the server
 
 ```go
 package main
