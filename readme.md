@@ -40,7 +40,7 @@ Here, we register the HTTP router using the einar-ioc framework. The NewRouter f
 ####  🔍 Create your router file
 Navigate to the /app/router folder. Inside this folder, we will create router.go
 ```bash
-/router
+/app/router
  - router.go #Echo Router 
 ``` 
 
@@ -85,6 +85,13 @@ func main() {
 
 ## 👨‍💻 HTTP Handler Registration
 In this section, we register the HTTP Handler using the einar-ioc framework. The `newGetExampleHandler` function is registered as a vertex in the dependency graph. Additionally, `router.NewRouter` is specified as a dependency of `newGetExampleHandler` and is represented as an edge in the graph. This setup signifies that `router.NewRouter` will be injected as a dependency into `newGetExampleHandler` during the instantiation of the handler.
+
+####  🔍 Create your router file
+Navigate to the /app/handler folder. Inside this folder, we will create get_example_handler.go
+```bash
+/app/handler
+ - get_example_handler.go
+``` 
 
 ```go
 package handler
