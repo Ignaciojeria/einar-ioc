@@ -144,7 +144,7 @@ func main() {
 #### 🔍 Start application and check Handler
 
 <div align="center">
-    <img src="/sketching/hello_world.jpeg" width="300" height="200">
+    <img src="/sketching/hello_world.jpeg" width="600" height="400">
 </div>
 
 ## 📑 Ioc.Registry : Constructor Registration Rules
