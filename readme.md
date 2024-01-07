@@ -1,4 +1,4 @@
-# Golang Dependency Injection Framework 🪡
+# Golang Dependency Injection Framework ::shipit::
 
 ## 🔧 Installation
 To install ioc, use the following command:
