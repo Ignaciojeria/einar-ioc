@@ -37,6 +37,13 @@ func main() {
 ## 👨‍💻 HTTP Router Registration
 Here, we register the HTTP router using the einar-ioc framework. The NewRouter function is registered as a vertex in the dependency graph. This means NewRouter will be used to instantiate the Echo HTTP router when needed in the application.
 
+####  🔍 Create your router file
+Navigate to the /app/router folder. Inside this folder, we will create router.go
+```bash
+/router
+ - router.go #Echo Router 
+``` 
+
 ```go
 package router
 
