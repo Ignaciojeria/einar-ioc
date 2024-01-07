@@ -13,7 +13,7 @@ The dependencies in the framework are represented as a Directed Acyclic Graph (D
 1. Constructors are vertices.
 2. Dependencies are edges.
 3. The graph is topologically ordered.
-4. Dependency loading starts from dependent nodes and proceeds to their ancestors.
+4. Dependency loading starts from descendant nodes and proceeds to their ancestors.
 
 ## 👨‍💻 Setup
 

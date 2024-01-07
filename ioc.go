@@ -37,8 +37,8 @@ var dependencyContainerMap = make(map[string]container)
 
 var orderedDependencyKeys []string
 
-func Registry(c constructor, constructorParameters ...constructor) error {
-	constructorKey, err := getConstructorKey(c)
+func Registry(vertex constructor, edges ...constructor) error {
+	constructorKey, err := getConstructorKey(vertex)
 
 	if err != nil {
 		errs = append(errs, err)
@@ -49,15 +49,15 @@ func Registry(c constructor, constructorParameters ...constructor) error {
 		return nil
 	}
 
-	constructorType := reflect.TypeOf(c)
+	constructorType := reflect.TypeOf(vertex)
 	if constructorType.Kind() != reflect.Func {
 		errs = append(errs, err)
 		return errors.New("provided constructor is not a function")
 	}
 	var constructorParameterKeys []string
 
-	for i := 0; i < len(constructorParameters); i++ {
-		constructorKey, err := getConstructorKey(constructorParameters[i])
+	for i := 0; i < len(edges); i++ {
+		constructorKey, err := getConstructorKey(edges[i])
 		if err != nil {
 			errs = append(errs, err)
 			return err
@@ -72,8 +72,8 @@ func Registry(c constructor, constructorParameters ...constructor) error {
 
 	dependencyContainerMap[constructorKey] = container{
 		id:                    id,
-		constructor:           c,
-		constructorParameters: constructorParameters,
+		constructor:           vertex,
+		constructorParameters: edges,
 	}
 	return nil
 }
