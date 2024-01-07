@@ -1,9 +1,5 @@
 # DAG Golang Dependency Injection Framework🔥
 
-<p align="center">
-  <img src="sketching/diagram.drawio.svg" alt="Diagram">
-</p>
-
 ## 🔧 Installation
 To install ioc, use the following command:
 
