@@ -16,6 +16,10 @@ The dependencies in the framework are represented as a Directed Acyclic Graph (D
 4. The graph is topologically ordered.
 5. Dependency loading starts from descendant nodes and proceeds to their ancestors.
 
+## 👨‍💻 Setup
+
+As a first step, we'll make sure that the `main` function loads all the dependencies we will inject later on. This initial loading of dependencies is crucial for setting up our Dependency Injection framework. 
+
 ```go
 package main
 
@@ -61,7 +65,3 @@ It's important to note that Ioc.Registry can only register constructors that ret
 1. Associated Structure of the Constructor: This is the primary type of the object or structure that the constructor is designed to create. It's a mandatory requirement for each constructor to return this type.
 
 2. Error (Optional): Optionally, the constructor can return a second type, which is an error. This return is used to indicate if there was any error during the creation of the object or structure. The inclusion of this return type is optional, but when present, it provides a robust way to handle errors in the creation process.
-
-## 👨‍💻 Setup
-
-As a first step, we'll make sure that the `main` function loads all the dependencies we will inject later on. This initial loading of dependencies is crucial for setting up our Dependency Injection framework. 
