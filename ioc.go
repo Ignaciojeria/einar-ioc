@@ -164,8 +164,17 @@ func validArgumentsGuardClause(key string, value reflect.Value, args []reflect.V
 	}
 
 	for i := 0; i < len(args); i++ {
-		if funcType.In(i) != args[i].Type() {
-			return fmt.Errorf("error in %s: incorrect argument type for parameter %d, expected %v, but got %v", key, i, funcType.In(i), args[i].Type())
+		expectedType := funcType.In(i)
+		argType := args[i].Type()
+
+		// Si el tipo esperado es una interfaz, comprueba si el tipo del argumento la implementa
+		if expectedType.Kind() == reflect.Interface && !argType.Implements(expectedType) {
+			return fmt.Errorf("error in %s: argument %d does not implement the expected interface %v, but got %v", key, i, expectedType, argType)
+		}
+
+		// Si no es interfaz, comprueba la igualdad de tipos
+		if expectedType.Kind() != reflect.Interface && expectedType != argType {
+			return fmt.Errorf("error in %s: incorrect argument type for parameter %d, expected %v, but got %v", key, i, expectedType, argType)
 		}
 	}
 

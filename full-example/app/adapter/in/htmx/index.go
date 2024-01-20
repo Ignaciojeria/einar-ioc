@@ -2,7 +2,7 @@ package htmx
 
 import (
 	"embed"
-	"my-project-name/app/adapter/in/htmx/app"
+	"my-project-name/app/adapter/in/htmx/module"
 	"my-project-name/app/infrastructure/server"
 	"net/http"
 
@@ -14,10 +14,14 @@ import (
 var _ = ioc.Registry(
 	newIndex,
 	server.NewServer,
-	app.NewAppModule)
+	module.NewAppModule)
 
 type index struct {
-	AppModule app.AppModule
+	server    server.Server
+	appModule module.IModule
+	URL       string
+	PushURL   bool
+	HTML      string
 }
 
 //go:embed *.html
@@ -28,9 +32,10 @@ var css embed.FS
 
 func newIndex(
 	s server.Server,
-	a app.AppModule) (index, error) {
+	appModule module.IModule,
+) (index, error) {
 	view := index{
-		AppModule: a,
+		appModule: appModule,
 	}
 	if err := s.TemplateRegistry(css, "index.css"); err != nil {
 		return index{}, err

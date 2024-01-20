@@ -7,16 +7,18 @@ import (
 
 	ioc "github.com/Ignaciojeria/einar-ioc"
 	"github.com/donseba/go-htmx/middleware"
+	"github.com/heimdalr/dag"
 	"github.com/labstack/echo/v4"
 )
 
 var _ = ioc.Registry(
-	NewAppModule,
+	NewApp,
 	server.NewServer,
 )
 
 type AppModule struct {
 	server  server.Server
+	graph   *dag.DAG
 	URL     string
 	PushURL bool
 	HTML    string
@@ -25,7 +27,7 @@ type AppModule struct {
 //go:embed *.html
 var html embed.FS
 
-func NewAppModule(s server.Server) (AppModule, error) {
+func NewApp(s server.Server) (AppModule, error) {
 	view := AppModule{
 		URL:     "/app",
 		PushURL: false,
