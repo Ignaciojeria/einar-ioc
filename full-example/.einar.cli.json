@@ -1,0 +1,18 @@
+{
+    "project": "my-project-name",
+    "template": {
+        "tag": "2.3.0",
+        "url": "https://github.com/Ignaciojeria/einar-cli-template-v2"
+    },
+    "installations": [],
+    "components": [
+        {
+            "kind": "get-controller",
+            "name": "get-customer"
+        },
+        {
+            "kind": "post-controller",
+            "name": "post-customer"
+        }
+    ]
+}
