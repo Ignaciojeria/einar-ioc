@@ -6,8 +6,6 @@ import (
 	"net/http"
 
 	ioc "github.com/Ignaciojeria/einar-ioc"
-	"github.com/donseba/go-htmx/middleware"
-	"github.com/heimdalr/dag"
 	"github.com/labstack/echo/v4"
 )
 
@@ -16,36 +14,39 @@ var _ = ioc.Registry(
 	server.NewServer,
 )
 
-type AppModule struct {
-	server  server.Server
-	graph   *dag.DAG
-	URL     string
-	PushURL bool
-	HTML    string
+type App struct {
+	server server.Server
+	URL    string
+	HTML   string
 }
 
 //go:embed *.html
 var html embed.FS
 
-func NewApp(s server.Server) (AppModule, error) {
-	view := AppModule{
-		URL:     "/app",
-		PushURL: false,
-		HTML:    "app.html",
-		server:  s,
+func NewApp(
+	s server.Server) (App, error) {
+	view := App{
+		URL: "/app",
+		//PushURL: false,
+		HTML:   "app.html",
+		server: s,
 	}
 	if err := s.TemplateRegistry(html, view.HTML); err != nil {
-		return AppModule{}, err
+		return App{}, err
 	}
 
-	s.Router().GET(view.URL, view.handle, echo.WrapMiddleware(middleware.MiddleWare))
+	//s.Router().GET(view.URL, view.handle, echo.WrapMiddleware(middleware.MiddleWare))
 	return view, nil
 }
 
-func (state AppModule) handle(c echo.Context) error {
+func (state App) Render(c echo.Context) error {
 	h := state.
 		server.HTMX().
 		NewHandler(c.Response().Writer, c.Request())
+
+	if !h.IsHxRequest() {
+		// do something
+	}
 
 	// check if the request is a htmx request
 	if h.IsHxRequest() {

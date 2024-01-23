@@ -9,25 +9,28 @@ import (
 
 	ioc "github.com/Ignaciojeria/einar-ioc"
 	"github.com/donseba/go-htmx"
+	"github.com/heimdalr/dag"
 	"github.com/labstack/echo/v4"
 )
 
 var _ = ioc.Registry(NewServer, configuration.NewConf)
 
 type Server struct {
-	c configuration.Conf
-	e *echo.Echo
-	t *template.Template
-	h *htmx.HTMX
+	c      configuration.Conf
+	e      *echo.Echo
+	t      *template.Template
+	h      *htmx.HTMX
+	appDag *dag.DAG
 }
 
 func NewServer(c configuration.Conf) Server {
 	e := echo.New()
 	return Server{
-		e: e,
-		c: c,
-		t: template.New(""),
-		h: htmx.New(),
+		e:      e,
+		c:      c,
+		t:      template.New(""),
+		h:      htmx.New(),
+		appDag: dag.NewDAG(),
 	}
 }
 
@@ -57,6 +60,14 @@ func (s Server) TemplateRegistry(fs embed.FS, pattern string) error {
 	t, err := s.t.ParseFS(fs, pattern)
 	s.t = t
 	return err
+}
+
+func (s Server) AppDag() *dag.DAG {
+	return s.appDag
+}
+
+func (s Server) ApiPrefix() string {
+	return s.c.ApiPrefix
 }
 
 type templateRegistry struct {

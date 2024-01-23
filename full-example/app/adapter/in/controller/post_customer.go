@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"my-project-name/app/configuration"
 	"my-project-name/app/infrastructure/server"
 	"net/http"
 
@@ -11,20 +10,17 @@ import (
 
 var _ = ioc.Registry(
 	newPostCustomer,
-	server.NewServer,
-	configuration.NewConf)
+	server.NewServer)
 
 type postCustomer struct {
 	s server.Server
 }
 
-func newPostCustomer(
-	s server.Server,
-	c configuration.Conf) postCustomer {
+func newPostCustomer(s server.Server) postCustomer {
 	controller := postCustomer{
 		s: s,
 	}
-	controller.s.Router().POST(c.ApiPrefix+"insert_your_pattern", controller.handle)
+	controller.s.Router().POST(s.ApiPrefix()+"insert_your_pattern", controller.handle)
 	return controller
 }
 

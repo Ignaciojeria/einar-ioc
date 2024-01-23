@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"my-project-name/app/configuration"
 	"my-project-name/app/infrastructure/server"
 	"net/http"
 
@@ -11,20 +10,17 @@ import (
 
 var _ = ioc.Registry(
 	newGetCustomer,
-	server.NewServer,
-	configuration.NewConf)
+	server.NewServer)
 
 type getCustomer struct {
 	s server.Server
 }
 
-func newGetCustomer(
-	s server.Server,
-	c configuration.Conf) getCustomer {
+func newGetCustomer(s server.Server) getCustomer {
 	controller := getCustomer{
 		s: s,
 	}
-	controller.s.Router().GET(c.ApiPrefix+"customer", controller.handle)
+	controller.s.Router().GET(s.ApiPrefix()+"customer", controller.handle)
 	return controller
 }
 
