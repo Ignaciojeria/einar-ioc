@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	ioc "github.com/Ignaciojeria/einar-ioc"
-	"github.com/heimdalr/dag"
 
 	"github.com/labstack/echo/v4"
 )
@@ -16,8 +15,8 @@ var _ = ioc.Registry(
 	server.NewServer)
 
 type Index struct {
-	URL string
-	Dag *dag.DAG
+	server server.Server
+	URL    string
 	//PushURL       bool
 	//DefaultModule string
 	HTML string
@@ -32,7 +31,8 @@ var css embed.FS
 
 func NewIndex(s server.Server) (Index, error) {
 	view := Index{
-		URL: "/",
+		server: s,
+		URL:    "/",
 		//DefaultModule: "/app",
 		//PushURL:       false,
 		HTML: "index.html",
@@ -44,14 +44,11 @@ func NewIndex(s server.Server) (Index, error) {
 	if err := s.TemplateRegistry(html, view.HTML); err != nil {
 		return Index{}, err
 	}
-	//cssHandler := echo.WrapHandler(http.FileServer(http.FS(css)))
-	//s.Router().GET(view.URL+view.CSS, cssHandler)
-	//s.Router().GET(view.URL, view.handle)
 	return view, nil
 }
 
 func (state Index) Render(c echo.Context) error {
-	err := c.Render(http.StatusOK, state.HTML, state)
+	err := c.Render(http.StatusOK, state.HTML, state.server.ContextGraph(c))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}

@@ -44,7 +44,12 @@ func (state App) Render(c echo.Context) error {
 		server.HTMX().
 		NewHandler(c.Response().Writer, c.Request())
 
+	contextGraph := state.server.ContextGraph(c)
+
 	if !h.IsHxRequest() {
+		//TODO :  Enviar en la redirección el contexto del nodo desde dónde se redireccionó
+		//TODO :  Ver la manera de representar multiples grafos para tener diferentes modulos de ruteo
+		return c.Redirect(304, contextGraph.OrderedPaths[0])
 		// do something
 	}
 
@@ -71,5 +76,5 @@ func (state App) Render(c echo.Context) error {
 	// set the headers for the response, see docs for more options
 	//h.PushURL("http://push.url")
 	//h.ReTarget("#ReTarged")
-	return c.Render(http.StatusOK, state.HTML, state)
+	return c.Render(http.StatusOK, state.HTML, contextGraph)
 }
