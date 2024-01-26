@@ -30,6 +30,8 @@ func newUIRouter(
 	index htmx.Index,
 	app app.App,
 	home home.Home) map[string]uirouter.UIRouter {
+
+	//Index HTML is called by default when you call http get using browser
 	routerMap := map[string]uirouter.UIRouter{
 		index.HTML: {
 			RootHTML: index.HTML,
@@ -54,6 +56,7 @@ func newUIRouter(
 				},
 			},
 		},
+		// HTMX request handle other routers
 		app.HTML: {
 			RootHTML: app.HTML,
 			Routes: []uirouter.Route{
