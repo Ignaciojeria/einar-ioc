@@ -29,10 +29,7 @@ func (m middleware) middleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		h := m.htmx.
 			NewHandler(c.Response().Writer, c.Request())
-			// Obtener la ruta activa y si fue encontrada
 		activeRoute, found := m.uiRouter.GetActiveRoute(c.Request().URL.Path)
-
-		// Si la ruta no fue encontrada, manejar como not found o similar
 		if !found {
 			return c.JSON(http.StatusNotFound, "Route not found")
 		}
