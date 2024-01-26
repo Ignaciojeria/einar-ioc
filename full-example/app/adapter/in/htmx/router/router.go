@@ -29,28 +29,45 @@ func newUIRouter(
 	server server.Server,
 	index htmx.Index,
 	app app.App,
-	home home.Home) uirouter.UIRouter {
-	router := uirouter.UIRouter{
-		RootHTML: index.HTML,
-		Routes: []uirouter.Route{
-			{
+	home home.Home) map[string]uirouter.UIRouter {
+	routerMap := map[string]uirouter.UIRouter{
+		index.HTML: {
+			RootHTML: index.HTML,
+			Routes: []uirouter.Route{
+				{
+					//index.html router-outlet
+					URL:        index.URL,
+					RedirectTo: app.URL,
+				},
+				{
+					//index.html router-outlet required for RedirectTo
+					URL: app.URL,
+				},
 				//index.html router-outlet
-				URL:        index.URL,
-				RedirectTo: app.URL,
+				{
+					URL: home.URL,
+				},
 			},
-			{
-				//index.html router-outlet
-				URL: app.URL,
-			},
-			{
-				//index.html router-outlet
-				URL: home.URL,
+		},
+		app.HTML: {
+			RootHTML: app.HTML,
+			Routes: []uirouter.Route{
+				{
+					//app.html router-outlet
+					URL:        app.URL,
+					RedirectTo: app.URL + home.URL,
+				},
+				{
+					//app.html router-outlet required for redirectTo
+					URL: app.URL + home.URL,
+				},
 			},
 		},
 	}
-	htmx.SetUIRouter(router)
+	htmx.SetUIRouterMap(routerMap)
 	server.Router().Use(htmx.middleware)
 	server.Router().GET(app.URL, app.Render)
+	server.Router().GET(app.URL+home.URL, home.Render)
 	server.Router().GET(home.URL, home.Render)
-	return router
+	return routerMap
 }

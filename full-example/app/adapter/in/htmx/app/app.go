@@ -5,8 +5,10 @@ import (
 	"my-project-name/app/infrastructure/server"
 	"my-project-name/app/infrastructure/uirouter"
 	"net/http"
+	"strings"
 
 	ioc "github.com/Ignaciojeria/einar-ioc"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -20,6 +22,7 @@ type App struct {
 	ActiveRoute uirouter.Route
 	URL         string
 	HTML        string
+	Target      string
 }
 
 //go:embed *.html
@@ -29,8 +32,9 @@ func NewApp(
 	server server.Server,
 ) (App, error) {
 	view := App{
-		URL:  "/app",
-		HTML: "app.html",
+		URL:    "/app",
+		HTML:   "app.html",
+		Target: strings.ReplaceAll(uuid.NewString(), "-", ""),
 	}
 	if err := server.TemplateRegistry(html, view.HTML); err != nil {
 		return App{}, err

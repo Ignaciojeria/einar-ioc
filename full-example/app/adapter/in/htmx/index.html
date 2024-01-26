@@ -8,9 +8,10 @@
 <html  class="sl-theme-dark">
 
 <div 
+hx-headers='{"HTMX-View": "index.html"}'
 hx-get="{{.URL}}"
 hx-trigger="load" 
-hx-target="#router-outlet" 
+hx-target="#router-outlet"
 hx-push-url="true"></div>
 
 <div id="router-outlet">

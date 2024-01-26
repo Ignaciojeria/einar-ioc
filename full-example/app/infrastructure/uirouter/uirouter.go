@@ -10,11 +10,6 @@ type UIRouter struct {
 type Route struct {
 	URL        string
 	RedirectTo string
-	Children   []Child
-}
-
-type Child struct {
-	Route
 }
 
 func (router UIRouter) GetActiveRoute(requestURL string) (Route, bool) {
@@ -29,13 +24,6 @@ func (router UIRouter) GetActiveRoute(requestURL string) (Route, bool) {
 				}
 			}
 			return route, true
-		}
-
-		// Revisar las rutas hijas
-		for _, child := range route.Children {
-			if child.URL == requestURL {
-				return child.Route, true
-			}
 		}
 	}
 	return Route{}, false

@@ -8,13 +8,16 @@ func TestGetActiveRoute(t *testing.T) {
 		RootHTML: "index.html",
 		Routes: []Route{
 			{
+				//index.html router-outlet
 				URL:        "/",
 				RedirectTo: "/app",
 			},
 			{
+				//index.html router-outlet
 				URL: "/app",
 			},
 			{
+				//index.html router-outlet
 				URL: "/home",
 			},
 		},
@@ -28,7 +31,7 @@ func TestGetActiveRoute(t *testing.T) {
 
 	activeRoute, _ = router.GetActiveRoute("/app")
 
-	if activeRoute.URL != "/home" {
+	if activeRoute.URL != "/app" {
 		t.Fail()
 	}
 
