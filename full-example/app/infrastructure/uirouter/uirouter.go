@@ -1,5 +1,11 @@
 package uirouter
 
+import (
+	"strings"
+
+	"github.com/google/uuid"
+)
+
 type UIRouter struct {
 	RootURL     string
 	RootHTML    string
@@ -27,4 +33,8 @@ func (router UIRouter) GetActiveRoute(requestURL string) (Route, bool) {
 		}
 	}
 	return Route{}, false
+}
+
+func NewSelectorTarget() string {
+	return "selector" + strings.ReplaceAll(uuid.NewString(), "-", "")
 }

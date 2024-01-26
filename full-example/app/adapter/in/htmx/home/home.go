@@ -5,10 +5,8 @@ import (
 	"my-project-name/app/infrastructure/server"
 	"my-project-name/app/infrastructure/uirouter"
 	"net/http"
-	"strings"
 
 	ioc "github.com/Ignaciojeria/einar-ioc"
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -34,7 +32,7 @@ func NewHome(
 	view := Home{
 		URL:    "/home",
 		HTML:   "home.html",
-		Target: "selector" + strings.ReplaceAll(uuid.NewString(), "-", ""),
+		Target: uirouter.NewSelectorTarget(),
 	}
 	if err := server.TemplateRegistry(html, view.HTML); err != nil {
 		return Home{}, err
