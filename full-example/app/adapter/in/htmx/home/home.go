@@ -1,9 +1,8 @@
-package app
+package home
 
 import (
 	"embed"
 	"my-project-name/app/infrastructure/server"
-	"my-project-name/app/infrastructure/uirouter"
 	"net/http"
 
 	ioc "github.com/Ignaciojeria/einar-ioc"
@@ -11,34 +10,32 @@ import (
 )
 
 var _ = ioc.Registry(
-	NewApp,
+	NewHome,
 	server.NewServer,
 )
 
-type App struct {
-	server      server.Server
-	ActiveRoute uirouter.Route
-	URL         string
-	HTML        string
+type Home struct {
+	server server.Server
+	URL    string
+	HTML   string
 }
 
 //go:embed *.html
 var html embed.FS
 
-func NewApp(
+func NewHome(
 	server server.Server,
-) (App, error) {
-	view := App{
-		URL:  "/app",
-		HTML: "app.html",
+) (Home, error) {
+	view := Home{
+		URL:  "/home",
+		HTML: "home.html",
 	}
 	if err := server.TemplateRegistry(html, view.HTML); err != nil {
-		return App{}, err
+		return Home{}, err
 	}
 	return view, nil
 }
 
-func (state App) Render(c echo.Context) error {
-	state.ActiveRoute = c.Get("activeRoute").(uirouter.Route)
+func (state Home) Render(c echo.Context) error {
 	return c.Render(http.StatusOK, state.HTML, state)
 }

@@ -25,7 +25,6 @@ func NewServer(c configuration.Conf) Server {
 		e: e,
 		c: c,
 		t: template.New(""),
-
 	}
 }
 

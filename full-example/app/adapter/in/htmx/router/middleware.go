@@ -1,23 +1,27 @@
 package router
 
 import (
+	"my-project-name/app/configuration"
 	"my-project-name/app/infrastructure/uirouter"
+	"net/http"
 
 	ioc "github.com/Ignaciojeria/einar-ioc"
 	htmxm "github.com/donseba/go-htmx"
 	"github.com/labstack/echo/v4"
 )
 
-var _ = ioc.Registry(NewMiddleware)
+var _ = ioc.Registry(NewMiddleware, configuration.NewConf)
 
 type middleware struct {
+	conf     configuration.Conf
 	htmx     *htmxm.HTMX
 	uiRouter uirouter.UIRouter
 }
 
-func NewMiddleware() middleware {
+func NewMiddleware(conf configuration.Conf) middleware {
 	return middleware{
 		htmx: htmxm.New(),
+		conf: conf,
 	}
 }
 
@@ -25,35 +29,21 @@ func (m middleware) middleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		h := m.htmx.
 			NewHandler(c.Response().Writer, c.Request())
+			// Obtener la ruta activa y si fue encontrada
+		activeRoute, found := m.uiRouter.GetActiveRoute(c.Request().URL.Path)
 
+		// Si la ruta no fue encontrada, manejar como not found o similar
+		if !found {
+			return c.JSON(http.StatusNotFound, "Route not found")
+		}
 		if !h.IsHxRequest() {
-			//TODO :  Enviar en la redirección el contexto del nodo desde dónde se redireccionó
-			//TODO :  Ver la manera de representar multiples grafos para tener diferentes modulos de ruteo
-			//contextGraph := m.server.ContextGraph(c)
-			//	fmt.Println("Solicitud htmx!", contextGraph)
-			// do something
+			err := c.Render(http.StatusOK, m.uiRouter.RootHTML, activeRoute)
+			if err != nil {
+				return c.JSON(http.StatusInternalServerError, err.Error())
+			}
+			return nil
 		}
-
-		// check if the request is a htmx request
-		if h.IsHxRequest() {
-			// do something
-		}
-
-		// check if the request is boosted
-		if h.IsHxBoosted() {
-			// do something
-		}
-
-		// check if the request is a history restore request
-		if h.IsHxHistoryRestoreRequest() {
-			// do something
-		}
-
-		// check if the request is a prompt request
-		if h.RenderPartial() {
-			// do something
-		}
-
+		c.Set("activeRoute", activeRoute)
 		return next(c)
 	}
 }

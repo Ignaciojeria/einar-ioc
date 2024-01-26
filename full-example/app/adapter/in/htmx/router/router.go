@@ -3,6 +3,7 @@ package router
 import (
 	"my-project-name/app/adapter/in/htmx"
 	"my-project-name/app/adapter/in/htmx/app"
+	"my-project-name/app/adapter/in/htmx/home"
 	"my-project-name/app/infrastructure/server"
 	"my-project-name/app/infrastructure/uirouter"
 
@@ -14,30 +15,42 @@ var _ = ioc.Registry(
 	NewMiddleware,
 	server.NewServer,
 	htmx.NewIndex,
-	app.NewApp)
+	app.NewApp,
+	home.NewHome)
 
 type appRouter struct {
 	index htmx.Index
 	app   app.App
+	home  home.Home
 }
 
 func newUIRouter(
 	htmx middleware,
 	server server.Server,
 	index htmx.Index,
-	app app.App) appRouter {
-	server.Router().Use(htmx.middleware)
-	server.Router().GET(index.URL, index.Render)
-	server.Router().GET(app.URL, app.Render)
+	app app.App,
+	home home.Home) uirouter.UIRouter {
 	router := uirouter.UIRouter{
-		Root: index.URL,
+		RootHTML: index.HTML,
 		Routes: []uirouter.Route{
 			{
+				//index.html router-outlet
 				URL:        index.URL,
 				RedirectTo: app.URL,
+			},
+			{
+				//index.html router-outlet
+				URL: app.URL,
+			},
+			{
+				//index.html router-outlet
+				URL: home.URL,
 			},
 		},
 	}
 	htmx.SetUIRouter(router)
-	return appRouter{}
+	server.Router().Use(htmx.middleware)
+	server.Router().GET(app.URL, app.Render)
+	server.Router().GET(home.URL, home.Render)
+	return router
 }

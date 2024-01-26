@@ -3,13 +3,12 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.12.0/cdn/themes/dark.css"/>
 <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.12.0/cdn/shoelace-autoloader.js"></script>
 <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.13.1/cdn/components/menu/menu.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/pinecone-router@4.x.x/dist/router.min.js"></script>
 
 
 <html  class="sl-theme-dark">
 
 <div 
-hx-get="{{.ChildComponent}}"
+hx-get="{{.URL}}"
 hx-trigger="load" 
 hx-target="#router-outlet" 
 hx-push-url="true"></div>
