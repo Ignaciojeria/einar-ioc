@@ -20,9 +20,9 @@ var _ = ioc.Registry(
 type App struct {
 	server      server.Server
 	ActiveRoute uirouter.Route
+	Target      string
 	URL         string
 	HTML        string
-	Target      string
 }
 
 //go:embed *.html
@@ -34,7 +34,7 @@ func NewApp(
 	view := App{
 		URL:    "/app",
 		HTML:   "app.html",
-		Target: strings.ReplaceAll(uuid.NewString(), "-", ""),
+		Target: "selector" + strings.ReplaceAll(uuid.NewString(), "-", ""),
 	}
 	if err := server.TemplateRegistry(html, view.HTML); err != nil {
 		return App{}, err

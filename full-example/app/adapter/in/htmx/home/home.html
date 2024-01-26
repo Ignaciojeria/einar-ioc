@@ -1,1 +1,12 @@
-Hello from home
+Hello from home Component
+
+<div 
+hx-headers='{"HTMX-View": "{{.HTML}}"}'
+hx-get="{{.ActiveRoute.URL}}"
+hx-trigger="load" 
+hx-target="#{{.Target}}" 
+hx-push-url="true"></div>
+
+<div id="{{.Target}}">
+</div>
+ 

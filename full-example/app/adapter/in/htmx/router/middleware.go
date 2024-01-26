@@ -1,7 +1,6 @@
 package router
 
 import (
-	"fmt"
 	"my-project-name/app/configuration"
 	"my-project-name/app/infrastructure/uirouter"
 	"net/http"
@@ -46,7 +45,6 @@ func (m middleware) middleware(next echo.HandlerFunc) echo.HandlerFunc {
 		if ext == ".html" || ext == ".css" || ext == ".js" {
 			return next(c)
 		}
-		fmt.Print("loop")
 
 		view := c.Request().Header.Get("HTMX-View")
 

@@ -40,6 +40,11 @@ func newUIRouter(
 					RedirectTo: app.URL,
 				},
 				{
+					//index.html router-outlet
+					URL:        app.URL + home.URL,
+					RedirectTo: app.URL,
+				},
+				{
 					//index.html router-outlet required for RedirectTo
 					URL: app.URL,
 				},

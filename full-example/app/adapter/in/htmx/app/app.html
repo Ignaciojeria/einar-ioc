@@ -2,7 +2,7 @@ Hello from APP Component
 
 <div 
 hx-headers='{"HTMX-View": "{{.HTML}}"}'
-hx-get="/app/home"
+hx-get="{{.ActiveRoute.URL}}"
 hx-trigger="load" 
 hx-target="#{{.Target}}" 
 hx-push-url="true"></div>
