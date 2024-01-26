@@ -71,6 +71,7 @@ func newUIRouter(
 				},
 			},
 		},
+		//If you need rendering other component inside home router you should add router here
 	}
 	htmx.SetUIRouterMap(routerMap)
 	server.Router().Use(htmx.middleware)
