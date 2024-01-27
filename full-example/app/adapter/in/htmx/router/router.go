@@ -55,7 +55,6 @@ func newUIRouter(
 				},
 			},
 		},
-		// HTMX request handle other routers
 		app.HTML: {
 			RootHTML: app.HTML,
 			Routes: []uirouter.Route{

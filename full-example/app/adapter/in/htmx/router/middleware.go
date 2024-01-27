@@ -31,19 +31,16 @@ func NewMiddleware(conf configuration.Conf) middleware {
 
 func (m middleware) middleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		requestPath := c.Request().URL.Path
+		ext := strings.ToLower(filepath.Ext(requestPath))
+		if ext == ".html" || ext == ".css" || ext == ".js" {
+			return next(c)
+		}
 
 		h := m.htmx.
 			NewHandler(c.Response().Writer, c.Request())
 
 		if h.IsHxRequest() && c.Request().Header.Get("HTMX-View") == "" {
-			return next(c)
-		}
-
-		requestPath := c.Request().URL.Path
-		ext := strings.ToLower(filepath.Ext(requestPath))
-
-		// Omitir middleware para archivos .html, .css, y .js
-		if ext == ".html" || ext == ".css" || ext == ".js" {
 			return next(c)
 		}
 
