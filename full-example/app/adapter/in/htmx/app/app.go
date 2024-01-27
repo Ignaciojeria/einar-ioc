@@ -3,6 +3,7 @@ package app
 import (
 	"embed"
 	"my-project-name/app/infrastructure/server"
+	"my-project-name/app/infrastructure/uicomponent"
 	"my-project-name/app/infrastructure/uirouter"
 	"net/http"
 
@@ -16,11 +17,7 @@ var _ = ioc.Registry(
 )
 
 type App struct {
-	server      server.Server
-	ActiveRoute uirouter.Route
-	Target      string
-	URL         string
-	HTML        string
+	uicomponent.Component
 }
 
 //go:embed *.html
@@ -30,9 +27,11 @@ func NewApp(
 	server server.Server,
 ) (App, error) {
 	view := App{
-		URL:    "/app",
-		HTML:   "app.html",
-		Target: uirouter.NewSelectorTarget(),
+		Component: uicomponent.Component{
+			URL:    "/app",
+			HTML:   "app.html",
+			Target: uirouter.NewSelectorTarget(),
+		},
 	}
 	if err := server.TemplateRegistry(html, view.HTML); err != nil {
 		return App{}, err
@@ -41,6 +40,8 @@ func NewApp(
 }
 
 func (state App) Render(c echo.Context) error {
-	state.ActiveRoute = c.Get("activeRoute").(uirouter.Route)
-	return c.Render(http.StatusOK, state.HTML, state)
+	return c.Render(
+		http.StatusOK,
+		state.HTML,
+		state.WithContext(c))
 }

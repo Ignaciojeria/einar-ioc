@@ -2,6 +2,7 @@ package router
 
 import (
 	"my-project-name/app/configuration"
+	"my-project-name/app/infrastructure/uicomponent"
 	"my-project-name/app/infrastructure/uirouter"
 	"net/http"
 	"path/filepath"
@@ -64,7 +65,7 @@ func (m middleware) middleware(next echo.HandlerFunc) echo.HandlerFunc {
 			}
 			return nil
 		}
-		c.Set("activeRoute", activeRoute)
+		c.Set(uicomponent.ActiveRoute, activeRoute)
 		return next(c)
 	}
 }

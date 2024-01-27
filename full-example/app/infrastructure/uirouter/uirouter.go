@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 )
 
 type UIRouter struct {
@@ -14,6 +15,7 @@ type UIRouter struct {
 }
 
 type Route struct {
+	Render     func(e echo.Context) error
 	URL        string
 	RedirectTo string
 }

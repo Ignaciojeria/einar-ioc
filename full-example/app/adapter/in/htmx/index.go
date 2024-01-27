@@ -3,6 +3,7 @@ package htmx
 import (
 	"embed"
 	"my-project-name/app/infrastructure/server"
+	"my-project-name/app/infrastructure/uicomponent"
 	"net/http"
 
 	ioc "github.com/Ignaciojeria/einar-ioc"
@@ -14,10 +15,7 @@ var _ = ioc.Registry(
 	server.NewServer)
 
 type Index struct {
-	URL            string
-	ChildComponent string
-	HTML           string
-	CSS            string
+	uicomponent.Component
 }
 
 //go:embed *.html
@@ -29,10 +27,11 @@ var css embed.FS
 func NewIndex(
 	server server.Server) (Index, error) {
 	view := Index{
-		URL:            "/",
-		ChildComponent: "/app",
-		HTML:           "index.html",
-		CSS:            "index.css",
+		Component: uicomponent.Component{
+			URL:  "/",
+			HTML: "index.html",
+			CSS:  "index.css",
+		},
 	}
 	if err := server.TemplateRegistry(css, view.CSS); err != nil {
 		return Index{}, err

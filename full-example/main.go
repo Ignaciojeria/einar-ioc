@@ -5,7 +5,6 @@ import (
 	"my-project-name/app/infrastructure/server"
 
 	_ "my-project-name/app/adapter/in/controller"
-	_ "my-project-name/app/adapter/in/htmx"
 	_ "my-project-name/app/adapter/in/htmx/router"
 
 	ioc "github.com/Ignaciojeria/einar-ioc"
