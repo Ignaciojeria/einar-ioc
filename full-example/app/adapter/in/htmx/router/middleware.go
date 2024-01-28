@@ -16,9 +16,8 @@ import (
 var _ = ioc.Registry(NewMiddleware, configuration.NewConf)
 
 type middleware struct {
-	conf configuration.Conf
-	htmx *htmxm.HTMX
-	//uiRouter    uirouter.UIRouter
+	conf        configuration.Conf
+	htmx        *htmxm.HTMX
 	uiRouterMap map[string]uirouter.UIRouter
 }
 
@@ -31,7 +30,12 @@ func NewMiddleware(conf configuration.Conf) middleware {
 
 func (m middleware) middleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
+
 		requestPath := c.Request().URL.Path
+		if strings.HasPrefix(requestPath, m.conf.ApiPrefix) {
+			return next(c)
+		}
+
 		ext := strings.ToLower(filepath.Ext(requestPath))
 		if ext == ".html" || ext == ".css" || ext == ".js" {
 			return next(c)
@@ -52,10 +56,12 @@ func (m middleware) middleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 		router := m.uiRouterMap[view]
 		activeRoute, found := router.GetActiveRoute(requestPath)
+		activeRoute = activeRoute.WithUserInputPath(c.Request().Header.Get("UserInputPath"))
 		if !found {
 			return c.JSON(http.StatusNotFound, "Route not found")
 		}
 		if !h.IsHxRequest() {
+			activeRoute.UserInputPath = requestPath
 			err := c.Render(http.StatusOK, "index.html", activeRoute)
 			if err != nil {
 				return c.JSON(http.StatusInternalServerError, err.Error())

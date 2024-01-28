@@ -1,7 +1,7 @@
 Hello from home Component
 
 <div 
-hx-headers='{"HTMX-View": "{{.HTML}}"}'
+hx-headers='{"HTMX-View": "{{.HTML}}","UserInputPath": "{{.ActiveRoute.UserInputPath}}"}'
 hx-get="{{.ActiveRoute.URL}}"
 hx-trigger="load" 
 hx-target="#{{.Target}}" 

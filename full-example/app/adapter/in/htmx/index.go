@@ -4,10 +4,8 @@ import (
 	"embed"
 	"my-project-name/app/infrastructure/server"
 	"my-project-name/app/infrastructure/uicomponent"
-	"net/http"
 
 	ioc "github.com/Ignaciojeria/einar-ioc"
-	"github.com/labstack/echo/v4"
 )
 
 var _ = ioc.Registry(
@@ -40,12 +38,4 @@ func NewIndex(
 		return Index{}, err
 	}
 	return view, nil
-}
-
-func (state Index) Render(c echo.Context) error {
-	err := c.Render(http.StatusOK, state.HTML, state)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
-	}
-	return nil
 }

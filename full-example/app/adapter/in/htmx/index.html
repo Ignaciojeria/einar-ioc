@@ -8,7 +8,7 @@
 <html  class="sl-theme-dark">
 
 <div 
-hx-headers='{"HTMX-View": "index.html"}'
+hx-headers='{"HTMX-View": "index.html", "UserInputPath": "{{.UserInputPath}}"}'
 hx-get="{{.URL}}"
 hx-trigger="load" 
 hx-target="#router-outlet"

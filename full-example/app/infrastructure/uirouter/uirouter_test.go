@@ -20,6 +20,18 @@ func TestGetActiveRoute(t *testing.T) {
 				//index.html router-outlet
 				URL: "/home",
 			},
+			{
+				//index.html router-outlet
+				URL: "/users/:id",
+			},
+			{
+				//index.html router-outlet
+				URL: "/users",
+			},
+			{
+				//index.html router-outlet
+				URL: "/customers/:id/company/:id",
+			},
 		},
 	}
 
@@ -32,6 +44,25 @@ func TestGetActiveRoute(t *testing.T) {
 	activeRoute, _ = router.GetActiveRoute("/app")
 
 	if activeRoute.URL != "/app" {
+		t.Fail()
+	}
+
+	activeRoute, _ = router.GetActiveRoute("/users/1")
+
+	if activeRoute.URL != "/users/1" {
+		t.Fail()
+	}
+
+	activeRoute, _ = router.GetActiveRoute("/users")
+
+	if activeRoute.URL != "/users" {
+		t.Fail()
+	}
+
+	activeRoute, _ = router.GetActiveRoute("/customers/1/company/2")
+
+	// me refiero que el objeto activeRoute.URL en vez de retornar lo siguiente :
+	if activeRoute.URL != "/customers/1/company/2" {
 		t.Fail()
 	}
 

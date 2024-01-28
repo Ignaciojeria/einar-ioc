@@ -28,7 +28,7 @@ func NewHome(
 ) (Home, error) {
 	view := Home{
 		Component: uicomponent.Component{
-			URL:    "/home",
+			URL:    "/home/:id",
 			HTML:   "home.html",
 			Target: uirouter.NewSelectorTarget(),
 		},
