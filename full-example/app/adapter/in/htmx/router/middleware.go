@@ -31,7 +31,16 @@ func NewMiddleware(conf configuration.Conf) middleware {
 func (m middleware) middleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 
-		requestPath := c.Request().URL.Path
+		requestURL := c.Request().URL
+		requestPath := requestURL.Path
+		queryString := requestURL.RawQuery
+
+		// Combina el path con los query parameters, si existen
+		fullRequestPath := requestPath
+		if queryString != "" {
+			fullRequestPath += "?" + queryString
+		}
+
 		if strings.HasPrefix(requestPath, m.conf.ApiPrefix) {
 			return next(c)
 		}
@@ -55,13 +64,14 @@ func (m middleware) middleware(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		router := m.uiRouterMap[view]
-		activeRoute, found := router.GetActiveRoute(requestPath)
-		activeRoute = activeRoute.WithUserInputPath(c.Request().Header.Get("UserInputPath"))
+		activeRoute, found := router.GetActiveRoute(fullRequestPath)
+		userInputPath := c.Request().Header.Get("UserInputPath")
+		activeRoute = activeRoute.WithUserInputPath(userInputPath)
 		if !found {
 			return c.JSON(http.StatusNotFound, "Route not found")
 		}
 		if !h.IsHxRequest() {
-			activeRoute.UserInputPath = requestPath
+			activeRoute.UserInputPath = fullRequestPath
 			err := c.Render(http.StatusOK, "index.html", activeRoute)
 			if err != nil {
 				return c.JSON(http.StatusInternalServerError, err.Error())

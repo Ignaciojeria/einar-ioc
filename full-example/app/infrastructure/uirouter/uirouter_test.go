@@ -66,4 +66,11 @@ func TestGetActiveRoute(t *testing.T) {
 		t.Fail()
 	}
 
+	activeRoute, _ = router.GetActiveRoute("/customers/1/company/2?QueryParam1=1&QueryParam2=2")
+
+	// me refiero que el objeto activeRoute.URL en vez de retornar lo siguiente :
+	if activeRoute.URL != "/customers/1/company/2?QueryParam1=1&QueryParam2=2" {
+		t.Fail()
+	}
+
 }

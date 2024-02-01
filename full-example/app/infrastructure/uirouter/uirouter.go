@@ -1,6 +1,7 @@
 package uirouter
 
 import (
+	"net/url"
 	"strings"
 
 	"github.com/google/uuid"
@@ -22,8 +23,17 @@ type Route struct {
 }
 
 func (router UIRouter) GetActiveRoute(requestURL string) (Route, bool) {
+	// Separa el path de los query params
+	u, err := url.Parse(requestURL)
+	if err != nil {
+		return Route{}, false
+	}
+
+	path := u.Path
+	query := u.RawQuery
+
 	for _, route := range router.Routes {
-		if isMatch(route.URL, requestURL) {
+		if isMatch(route.URL, path) {
 			if route.RedirectTo != "" {
 				// Encuentra y devuelve la ruta a la que se redirige
 				for _, redirectRoute := range router.Routes {
@@ -34,7 +44,10 @@ func (router UIRouter) GetActiveRoute(requestURL string) (Route, bool) {
 			}
 
 			// Construir la nueva URL con parámetros reemplazados
-			replacedURL := replaceParams(route.URL, requestURL)
+			replacedURL := replaceParams(route.URL, path)
+			if query != "" {
+				replacedURL += "?" + query
+			}
 			route.URL = replacedURL
 			return route, true
 		}
