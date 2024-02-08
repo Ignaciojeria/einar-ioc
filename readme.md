@@ -62,7 +62,7 @@ func NewRouter() *echo.Echo {
 
 #### 🔍 Retrieving the registered router & start the server
 
-The assertion is used exclusively within the main function to retrieve the server instance. The ioc.Get method functions as an auxiliary approach and should be reserved for exceptional circumstances. This necessity arises because the initial function does not constitute a structure conducive to applying the principle of dependency injection. Furthermore, interfaces can also be employed to adhere to the Dependency Inversion Principle, offering a more flexible and decoupled architecture by allowing high-level modules to not depend on low-level modules, but rather on abstractions.
+The assertion is used exclusively within the main function to retrieve the server instance. The ioc.Get method functions as an auxiliary approach and should be reserved for exceptional circumstances. This necessity arises because the initial function does not constitute a structure conducive to applying the principle of dependency injection.
 
 ```go
 package main
