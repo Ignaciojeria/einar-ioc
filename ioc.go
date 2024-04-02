@@ -147,6 +147,10 @@ func dependencyRulesGuardClause(key string, value reflect.Value) error {
 		return errors.New(key + ": " + "the function must have at least 1 return value")
 	}
 
+	if numOut > 2 {
+		return errors.New(key + ": " + "the function must have no more than 2 return values")
+	}
+
 	if numOut == 2 {
 		if funcType.Out(1) != reflect.TypeOf((*error)(nil)).Elem() {
 			return errors.New(key + ": " + "the second return value must be of type error")
@@ -182,6 +186,19 @@ func validArgumentsGuardClause(key string, value reflect.Value, args []reflect.V
 }
 
 func resultRulesGuardClause(key string, result []reflect.Value) error {
+
+	if len(result) == 1 {
+		firstVal := result[0]
+		if firstVal.Kind() == reflect.Ptr || firstVal.Kind() == reflect.Slice || firstVal.Kind() == reflect.Map ||
+			firstVal.Kind() == reflect.Chan || firstVal.Kind() == reflect.Func || firstVal.Kind() == reflect.Interface {
+			if !firstVal.IsNil() {
+				if err, ok := firstVal.Interface().(error); ok {
+					return err
+				}
+			}
+		}
+	}
+
 	if len(result) == 2 {
 		secondVal := result[1]
 

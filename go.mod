@@ -1,6 +1,6 @@
 module github.com/Ignaciojeria/einar-ioc
 
-go 1.21.2
+go 1.18
 
 require github.com/heimdalr/dag v1.4.0
 
