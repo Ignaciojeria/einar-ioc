@@ -45,9 +45,8 @@ type Event struct {
 	Greeter Greeter
 }
 
-func NewEvent(g Greeter) error {
+func NewEvent(g Greeter) {
 	fmt.Println(g.Greet())
-	return nil
 }
 
 func TestLoadDependencies(t *testing.T) {
