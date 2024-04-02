@@ -3,7 +3,7 @@
 ## 🔧 Installation
 To install ioc, use the following command:
 
-    go get github.com/Ignaciojeria/einar-ioc@v1.8.0
+    go get github.com/Ignaciojeria/einar-ioc@v1.9.0
 
 ## 👨‍💻 Example
 
