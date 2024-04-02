@@ -3,7 +3,7 @@
 ## 🔧 Installation
 To install ioc, use the following command:
 
-    go get github.com/Ignaciojeria/einar-ioc@v1.8.0
+    go get github.com/Ignaciojeria/einar-ioc@v1.9.0
 
 ## 👨‍💻 Example
 
@@ -45,9 +45,8 @@ type Event struct {
 	Greeter Greeter
 }
 
-func NewEvent(g Greeter) error {
+func NewEvent(g Greeter) {
 	fmt.Println(g.Greet())
-	return nil
 }
 
 func TestLoadDependencies(t *testing.T) {
