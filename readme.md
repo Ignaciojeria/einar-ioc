@@ -143,11 +143,6 @@ func main() {
 	r.(*echo.Echo).Start(":8080")
 }
 ```
-#### 🔍 Start application and check Handler
-
-<div align="center">
-    <img src="/sketching/hello_world.jpeg" width="720" height="400">
-</div>
 
 ## 📑 Ioc.Registry : Constructor Registration Rules
 
