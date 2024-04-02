@@ -37,27 +37,28 @@ var dependencyContainerMap = make(map[string]container)
 
 var orderedDependencyKeys []string
 
-func Registry(vertex constructor, edges ...constructor) error {
+func Registry(vertex constructor, edges ...constructor) {
 	constructorKey, err := getConstructorKey(vertex)
 
 	if err != nil {
 		errs = append(errs, err)
-		return err
+		return
 	}
 
 	if dependencyContainerMap[constructorKey].constructor != nil {
-		return nil
+		return
 	}
 
 	constructorType := reflect.TypeOf(vertex)
 	if constructorType.Kind() != reflect.Func {
 		errs = append(errs, err)
-		return errors.New("provided constructor is not a function")
+		return
 	}
 
 	id, err := graph.AddVertex(constructorKey)
 	if err != nil {
-		return err
+		errs = append(errs, err)
+		return
 	}
 
 	dependencyContainerMap[constructorKey] = container{
@@ -65,7 +66,6 @@ func Registry(vertex constructor, edges ...constructor) error {
 		constructor:           vertex,
 		constructorParameters: edges,
 	}
-	return nil
 }
 
 func getConstructorKey(constructor constructor) (string, error) {

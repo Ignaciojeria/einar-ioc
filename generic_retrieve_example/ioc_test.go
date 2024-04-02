@@ -7,15 +7,17 @@ import (
 	ioc "github.com/Ignaciojeria/einar-ioc"
 )
 
-var _ = ioc.Registry(NewMessage)
+func init() {
+	ioc.Registry(NewMessage)
+	ioc.Registry(NewGreeter, NewMessage)
+	ioc.Registry(NewEvent, NewGreeter)
+}
 
 type Message string
 
 func NewMessage() Message {
 	return Message("Hi there!")
 }
-
-var _ = ioc.Registry(NewGreeter, NewMessage)
 
 type Greeter struct {
 	Message Message
@@ -28,8 +30,6 @@ func NewGreeter(m Message) Greeter {
 func (g Greeter) Greet() Message {
 	return g.Message
 }
-
-var _ = ioc.Registry(NewEvent, NewGreeter)
 
 type Event struct {
 	Greeter Greeter
