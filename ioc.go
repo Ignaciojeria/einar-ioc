@@ -111,7 +111,7 @@ func LoadDependencies() error {
 		var args []reflect.Value
 
 		for _, constructorParameter := range ctnr.constructorParameters {
-			dependency, err := Get(constructorParameter)
+			dependency, err := get(constructorParameter)
 			if err != nil {
 				return err
 			}
@@ -217,7 +217,7 @@ func resultRulesGuardClause(key string, result []reflect.Value) error {
 	return nil
 }
 
-func Get(c constructor) (dependency, error) {
+func get(c constructor) (dependency, error) {
 	constructorKey, err := getConstructorKey(c)
 	if err != nil {
 		return nil, err
@@ -227,4 +227,16 @@ func Get(c constructor) (dependency, error) {
 		return dependency, nil
 	}
 	return nil, errors.New(constructorKey + "dependency is not present")
+}
+
+func Get[T any](c constructor) T {
+	constructorKey, err := getConstructorKey(c)
+	if err != nil {
+		panic(fmt.Errorf("failed to get constructor key: %v", err))
+	}
+	dependency := dependencyContainerMap[constructorKey].dependency
+	if dependency == nil {
+		panic(fmt.Errorf(constructorKey + " dependency is not present"))
+	}
+	return dependency.(T)
 }
