@@ -18,9 +18,15 @@ import (
 )
 
 func init() {
+	//dont worry about dependency order registration.
 	ioc.Registry(NewMessage)
 	ioc.Registry(NewGreeter, NewMessage)
 	ioc.Registry(NewEvent, NewGreeter)
+	/* this works too
+	ioc.Registry(NewGreeter, NewMessage)
+	ioc.Registry(NewEvent, NewGreeter)
+	ioc.Registry(NewMessage)
+	*/
 }
 
 type Message string
