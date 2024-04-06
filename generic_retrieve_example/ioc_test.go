@@ -48,6 +48,12 @@ func TestLoadDependencies(t *testing.T) {
 		t.Log(err)
 		t.Fail()
 	}
-	event := ioc.Get[Event](NewEvent)
-	fmt.Println(event.SendGreet())
+	//print: Hi there!
+	fmt.Println(ioc.Get[Message](NewMessage))
+	mb := ioc.NewMockBehaviourForTesting[Message](NewMessage, Message("message mocked"))
+	//print: message mocked
+	fmt.Println(ioc.Get[Message](NewMessage))
+	mb.Release()
+	//print: Hi there!
+	fmt.Println(ioc.Get[Message](NewMessage))
 }

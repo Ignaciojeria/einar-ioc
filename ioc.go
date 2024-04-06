@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"runtime"
 	"strings"
+	"sync"
 
 	"github.com/heimdalr/dag"
 )
@@ -239,4 +240,49 @@ func Get[T any](c constructor) T {
 		panic(fmt.Errorf(constructorKey + " dependency is not present"))
 	}
 	return dependency.(T)
+}
+
+var mu map[string]*sync.Mutex = make(map[string]*sync.Mutex)
+var muLock sync.Mutex
+
+type mockBehaviour[T any] struct {
+	constructorKey string
+	originalValue  T
+}
+
+func NewMockBehaviourForTesting[T any](c constructor, mock T) mockBehaviour[T] {
+	constructorKey, err := getConstructorKey(c)
+	if err != nil {
+		panic(fmt.Errorf("failed to get constructor key: %v", err))
+	}
+
+	muLock.Lock()
+	m, ok := mu[constructorKey]
+	if !ok {
+		m = &sync.Mutex{}
+		mu[constructorKey] = m
+	}
+	muLock.Unlock()
+
+	m.Lock()
+
+	originalValue := dependencyContainerMap[constructorKey].dependency
+
+	dependencyRefMap := dependencyContainerMap[constructorKey]
+	dependencyRefMap.dependency = mock
+	dependencyContainerMap[constructorKey] = dependencyRefMap
+
+	return mockBehaviour[T]{
+		constructorKey: constructorKey,
+		originalValue:  originalValue.(T),
+	}
+}
+
+func (mb mockBehaviour[T]) Release() {
+	if m, ok := mu[mb.constructorKey]; ok {
+		mockedRef := dependencyContainerMap[mb.constructorKey]
+		mockedRef.dependency = mb.originalValue
+		dependencyContainerMap[mb.constructorKey] = mockedRef
+		m.Unlock()
+	}
 }
