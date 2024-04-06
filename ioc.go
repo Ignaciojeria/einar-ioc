@@ -47,7 +47,7 @@ func Registry(vertex constructor, edges ...constructor) {
 	}
 
 	if dependencyContainerMap[constructorKey].constructor != nil {
-		return
+		panic(fmt.Errorf("constructor already registered: %v", constructorKey))
 	}
 
 	constructorType := reflect.TypeOf(vertex)
