@@ -55,7 +55,9 @@ func TestLoadDependencies(t *testing.T) {
 	fmt.Println(ioc.Get[Message](NewMessage))
 	mb.Release()
 	mb2 := ioc.NewMockBehaviourForTesting[Message](NewMessage, Message("message mocked 2"))
-	//print: Hi there!
+	//print: message mocked 2
 	fmt.Println(ioc.Get[Message](NewMessage))
 	mb2.Release()
+	//print: Hi there!
+	fmt.Println(ioc.Get[Message](NewMessage))
 }
