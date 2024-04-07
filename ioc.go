@@ -268,6 +268,10 @@ func NewMockBehaviourForTesting[T any](c constructor, mock T) mockBehaviour[T] {
 
 	originalValue := dependencyContainerMap[constructorKey].dependency
 
+	if originalValue == nil {
+		originalValue = mock
+	}
+
 	dependencyRefMap := dependencyContainerMap[constructorKey]
 	dependencyRefMap.dependency = mock
 	dependencyContainerMap[constructorKey] = dependencyRefMap
