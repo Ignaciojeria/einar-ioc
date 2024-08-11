@@ -4,13 +4,18 @@ import (
 	"fmt"
 	"testing"
 
-	ioc "github.com/Ignaciojeria/einar-ioc"
+	ioc "github.com/Ignaciojeria/einar-ioc/v2"
 )
 
 func init() {
+	ioc.RegistryAtEnd(AtEnd)
 	ioc.Registry(NewMessage)
 	ioc.Registry(NewGreeter, NewMessage)
 	ioc.Registry(NewEvent, NewGreeter)
+}
+
+func AtEnd() {
+	fmt.Println("hello at end")
 }
 
 type Message string
