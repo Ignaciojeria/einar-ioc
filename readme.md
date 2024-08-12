@@ -14,7 +14,7 @@ import (
 	"fmt"
 	"testing"
 
-	ioc "github.com/Ignaciojeria/einar-ioc"
+	ioc "github.com/Ignaciojeria/einar-ioc/v2"
 )
 
 func init() {
