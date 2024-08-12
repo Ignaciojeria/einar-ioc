@@ -13,7 +13,7 @@ import (
 type dependency any
 type constructor any
 
-type iocContainer struct {
+type IOC struct {
 	graph                  *dag.DAG
 	errs                   []error
 	dependencyContainerMap map[string]container
@@ -29,8 +29,8 @@ type container struct {
 }
 
 // New creates a new instance of the Container.
-func New() *iocContainer {
-	return &iocContainer{
+func New() *IOC {
+	return &IOC{
 		graph:                  dag.NewDAG(),
 		errs:                   []error{},
 		dependencyContainerMap: make(map[string]container),
@@ -49,7 +49,7 @@ func (v visitor) Visit(vertex dag.Vertexer) {
 }
 
 // Registry registers a constructor and its dependencies.
-func (c *iocContainer) Registry(vertex constructor, edges ...constructor) {
+func (c *IOC) Registry(vertex constructor, edges ...constructor) {
 	constructorKey, err := getConstructorKey(vertex)
 
 	if err != nil {
@@ -81,7 +81,7 @@ func (c *iocContainer) Registry(vertex constructor, edges ...constructor) {
 }
 
 // RegistryAtEnd registers a constructor to be initialized at the end of all other dependencies.
-func (c *iocContainer) RegistryAtEnd(vertex constructor, edges ...constructor) {
+func (c *IOC) RegistryAtEnd(vertex constructor, edges ...constructor) {
 	if c.atEndConstructor != nil {
 		panic("RegistryAtEnd can only be called once")
 	}
@@ -99,7 +99,7 @@ func (c *iocContainer) RegistryAtEnd(vertex constructor, edges ...constructor) {
 }
 
 // LoadDependencies initializes all registered dependencies in the correct order.
-func (c *iocContainer) LoadDependencies() error {
+func (c *IOC) LoadDependencies() error {
 	// Primero, procesar cualquier error acumulado
 	for _, v := range c.errs {
 		return v
@@ -175,7 +175,7 @@ func (c *iocContainer) LoadDependencies() error {
 	return nil
 }
 
-func (c *iocContainer) getContainer(constructor constructor) container {
+func (c *IOC) getContainer(constructor constructor) container {
 	constructorKey, _ := getConstructorKey(constructor)
 	return c.dependencyContainerMap[constructorKey]
 }
@@ -255,7 +255,7 @@ func resultRulesGuardClause(key string, result []reflect.Value) error {
 	return nil
 }
 
-func (c *iocContainer) get(constructor constructor) (dependency, error) {
+func (c *IOC) get(constructor constructor) (dependency, error) {
 	constructorKey, err := getConstructorKey(constructor)
 	if err != nil {
 		return nil, err
