@@ -20,6 +20,8 @@ import (
 var container = ioc.New()
 
 func init() {
+	// No need to worry about the order in which dependencies are registered here,
+	// the framework will resolve them in the correct topological order.
 	container.RegistryAtEnd(AtEnd, NewEvent)
 	container.Registry(NewMessage)
 	container.Registry(NewGreeter, NewMessage)
