@@ -8,27 +8,26 @@ To install ioc, use the following command:
 ## 👨‍💻 Example
 
 ```go
-package main
+package ioc
 
 import (
 	"fmt"
-	"os"
+	"testing"
 
-	ioc "github.com/Ignaciojeria/einar-ioc/v2"
+	ioc "github.com/Ignaciojeria/einar-ioc"
 )
 
+var container = ioc.New()
+
 func init() {
-	//dont worry about dependency order registration.
-	ioc.Registry(NewMessage)
-	ioc.Registry(NewGreeter, NewMessage)
-	ioc.Registry(NewEvent, NewGreeter)
-	ioc.Registry(SendGreetFromEvent, NewEvent)
-	/* this works too
-	ioc.Registry(SendGreetFromEvent, NewEvent)
-	ioc.Registry(NewGreeter, NewMessage)
-	ioc.Registry(NewEvent, NewGreeter)
-	ioc.Registry(NewMessage)
-	*/
+	container.RegistryAtEnd(AtEnd, NewEvent)
+	container.Registry(NewMessage)
+	container.Registry(NewGreeter, NewMessage)
+	container.Registry(NewEvent, NewGreeter)
+}
+
+func AtEnd(gr Event) {
+	fmt.Println("hello at end : " + gr.Greeter.Greet())
 }
 
 type Message string
@@ -54,20 +53,16 @@ type Event struct {
 }
 
 func NewEvent(g Greeter) Event {
-	return Event{Greeter: g}
+	fmt.Println(g.Greet())
+	return Event{
+		Greeter: g,
+	}
 }
 
-func (e Event) SendGreet() Message {
-	return e.Greeter.Greet()
-}
-
-func SendGreetFromEvent(e Event) {
-	fmt.Println(e.Greeter.Greet())
-}
-
-func main() {
-	if err := ioc.LoadDependencies(); err != nil {
-		os.Exit(0)
+func TestLoadDependencies(t *testing.T) {
+	if err := container.LoadDependencies(); err != nil {
+		fmt.Println(err)
+		t.Fail()
 	}
 }
 ```
