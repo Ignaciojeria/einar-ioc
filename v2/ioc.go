@@ -10,16 +10,16 @@ import (
 	"github.com/heimdalr/dag"
 )
 
-type dependency any
-type constructor any
-
-type IOC struct {
-	graph                  *dag.DAG
+var (
+	graph                  = dag.NewDAG()
 	errs                   []error
-	dependencyContainerMap map[string]container
+	dependencyContainerMap = make(map[string]container)
 	orderedDependencyKeys  []string
 	atEndConstructor       *container
-}
+)
+
+type dependency any
+type constructor any
 
 type container struct {
 	id                    string
@@ -28,17 +28,7 @@ type container struct {
 	dependency            dependency
 }
 
-// New creates a new instance of the Container.
-func New() *IOC {
-	return &IOC{
-		graph:                  dag.NewDAG(),
-		errs:                   []error{},
-		dependencyContainerMap: make(map[string]container),
-		orderedDependencyKeys:  []string{},
-		atEndConstructor:       nil,
-	}
-}
-
+// visitor is used to walk the graph in a topological order
 type visitor struct {
 	orderedDependencyKeys *[]string
 }
@@ -49,31 +39,31 @@ func (v visitor) Visit(vertex dag.Vertexer) {
 }
 
 // Registry registers a constructor and its dependencies.
-func (c *IOC) Registry(vertex constructor, edges ...constructor) {
+func Registry(vertex constructor, edges ...constructor) {
 	constructorKey, err := getConstructorKey(vertex)
 
 	if err != nil {
-		c.errs = append(c.errs, err)
+		errs = append(errs, err)
 		return
 	}
 
-	if c.dependencyContainerMap[constructorKey].constructor != nil {
+	if dependencyContainerMap[constructorKey].constructor != nil {
 		panic(fmt.Errorf("constructor already registered: %v", constructorKey))
 	}
 
 	constructorType := reflect.TypeOf(vertex)
 	if constructorType.Kind() != reflect.Func {
-		c.errs = append(c.errs, err)
+		errs = append(errs, err)
 		return
 	}
 
-	id, err := c.graph.AddVertex(constructorKey)
+	id, err := graph.AddVertex(constructorKey)
 	if err != nil {
-		c.errs = append(c.errs, err)
+		errs = append(errs, err)
 		return
 	}
 
-	c.dependencyContainerMap[constructorKey] = container{
+	dependencyContainerMap[constructorKey] = container{
 		id:                    id,
 		constructor:           vertex,
 		constructorParameters: edges,
@@ -81,8 +71,8 @@ func (c *IOC) Registry(vertex constructor, edges ...constructor) {
 }
 
 // RegistryAtEnd registers a constructor to be initialized at the end of all other dependencies.
-func (c *IOC) RegistryAtEnd(vertex constructor, edges ...constructor) {
-	if c.atEndConstructor != nil {
+func RegistryAtEnd(vertex constructor, edges ...constructor) {
+	if atEndConstructor != nil {
 		panic("RegistryAtEnd can only be called once")
 	}
 
@@ -91,7 +81,7 @@ func (c *IOC) RegistryAtEnd(vertex constructor, edges ...constructor) {
 		panic(err)
 	}
 
-	c.atEndConstructor = &container{
+	atEndConstructor = &container{
 		id:                    constructorKey,
 		constructor:           vertex,
 		constructorParameters: edges,
@@ -99,25 +89,25 @@ func (c *IOC) RegistryAtEnd(vertex constructor, edges ...constructor) {
 }
 
 // LoadDependencies initializes all registered dependencies in the correct order.
-func (c *IOC) LoadDependencies() error {
+func LoadDependencies() error {
 	// Primero, procesar cualquier error acumulado
-	for _, v := range c.errs {
+	for _, v := range errs {
 		return v
 	}
 
 	// Construir el grafo de dependencias y ordenar las claves de los constructores
-	for _, v := range c.dependencyContainerMap {
+	for _, v := range dependencyContainerMap {
 		for _, z := range v.constructorParameters {
-			ctnr := c.getContainer(z)
-			c.graph.AddEdge(v.id, ctnr.id)
+			ctnr := getContainer(z)
+			graph.AddEdge(v.id, ctnr.id)
 		}
 	}
-	c.graph.OrderedWalk(visitor{orderedDependencyKeys: &c.orderedDependencyKeys})
+	graph.OrderedWalk(visitor{orderedDependencyKeys: &orderedDependencyKeys})
 
 	// Ejecutar los constructores en el orden correcto
-	for i := len(c.orderedDependencyKeys) - 1; i >= 0; i-- {
-		key := c.orderedDependencyKeys[i]
-		ctnr := c.dependencyContainerMap[key]
+	for i := len(orderedDependencyKeys) - 1; i >= 0; i-- {
+		key := orderedDependencyKeys[i]
+		ctnr := dependencyContainerMap[key]
 		value := reflect.ValueOf(ctnr.constructor)
 		if err := dependencyRulesGuardClause(key, value); err != nil {
 			return err
@@ -125,7 +115,7 @@ func (c *IOC) LoadDependencies() error {
 		var args []reflect.Value
 
 		for _, constructorParameter := range ctnr.constructorParameters {
-			dependency, err := c.get(constructorParameter)
+			dependency, err := get(constructorParameter)
 			if err != nil {
 				return err
 			}
@@ -140,44 +130,44 @@ func (c *IOC) LoadDependencies() error {
 			return err
 		}
 
-		container := c.dependencyContainerMap[key]
+		container := dependencyContainerMap[key]
 		if len(result) != 0 {
 			container.dependency = result[0].Interface()
 		}
-		c.dependencyContainerMap[key] = container
+		dependencyContainerMap[key] = container
 	}
 
 	// Ejecutar el constructor registrado al final si existe
-	if c.atEndConstructor != nil {
-		endValue := reflect.ValueOf(c.atEndConstructor.constructor)
+	if atEndConstructor != nil {
+		endValue := reflect.ValueOf(atEndConstructor.constructor)
 		var endArgs []reflect.Value
 
-		for _, constructorParameter := range c.atEndConstructor.constructorParameters {
-			dependency, err := c.get(constructorParameter)
+		for _, constructorParameter := range atEndConstructor.constructorParameters {
+			dependency, err := get(constructorParameter)
 			if err != nil {
 				return err
 			}
 			endArgs = append(endArgs, reflect.ValueOf(dependency))
 		}
 
-		if err := validArgumentsGuardClause(c.atEndConstructor.id, endValue, endArgs); err != nil {
+		if err := validArgumentsGuardClause(atEndConstructor.id, endValue, endArgs); err != nil {
 			return err
 		}
 		result := endValue.Call(endArgs)
-		if err := resultRulesGuardClause(c.atEndConstructor.id, result); err != nil {
+		if err := resultRulesGuardClause(atEndConstructor.id, result); err != nil {
 			return err
 		}
 		if len(result) != 0 {
-			c.atEndConstructor.dependency = result[0].Interface()
+			atEndConstructor.dependency = result[0].Interface()
 		}
 	}
 
 	return nil
 }
 
-func (c *IOC) getContainer(constructor constructor) container {
+func getContainer(constructor constructor) container {
 	constructorKey, _ := getConstructorKey(constructor)
-	return c.dependencyContainerMap[constructorKey]
+	return dependencyContainerMap[constructorKey]
 }
 
 func dependencyRulesGuardClause(key string, value reflect.Value) error {
@@ -255,12 +245,12 @@ func resultRulesGuardClause(key string, result []reflect.Value) error {
 	return nil
 }
 
-func (c *IOC) get(constructor constructor) (dependency, error) {
+func get(constructor constructor) (dependency, error) {
 	constructorKey, err := getConstructorKey(constructor)
 	if err != nil {
 		return nil, err
 	}
-	dependency := c.dependencyContainerMap[constructorKey].dependency
+	dependency := dependencyContainerMap[constructorKey].dependency
 	if dependency != nil {
 		return dependency, nil
 	}

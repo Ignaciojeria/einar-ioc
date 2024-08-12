@@ -17,15 +17,13 @@ import (
 	ioc "github.com/Ignaciojeria/einar-ioc"
 )
 
-var container = ioc.New()
-
 func init() {
 	// No need to worry about the order in which dependencies are registered here,
 	// the framework will resolve them in the correct topological order.
-	container.RegistryAtEnd(AtEnd, NewEvent)
-	container.Registry(NewMessage)
-	container.Registry(NewGreeter, NewMessage)
-	container.Registry(NewEvent, NewGreeter)
+	ioc.RegistryAtEnd(AtEnd, NewEvent)
+	ioc.Registry(NewMessage)
+	ioc.Registry(NewGreeter, NewMessage)
+	ioc.Registry(NewEvent, NewGreeter)
 }
 
 func AtEnd(gr Event) {
@@ -62,7 +60,7 @@ func NewEvent(g Greeter) Event {
 }
 
 func TestLoadDependencies(t *testing.T) {
-	if err := container.LoadDependencies(); err != nil {
+	if err := ioc.LoadDependencies(); err != nil {
 		fmt.Println(err)
 		t.Fail()
 	}
