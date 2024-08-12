@@ -4,18 +4,20 @@ import (
 	"fmt"
 	"testing"
 
-	ioc "github.com/Ignaciojeria/einar-ioc/v2"
+	ioc "github.com/Ignaciojeria/einar-ioc"
 )
 
+var container = ioc.New()
+
 func init() {
-	ioc.RegistryAtEnd(AtEnd)
-	ioc.Registry(NewMessage)
-	ioc.Registry(NewGreeter, NewMessage)
-	ioc.Registry(NewEvent, NewGreeter)
+	container.RegistryAtEnd(AtEnd, NewEvent)
+	container.Registry(NewMessage)
+	container.Registry(NewGreeter, NewMessage)
+	container.Registry(NewEvent, NewGreeter)
 }
 
-func AtEnd() {
-	fmt.Println("hello at end")
+func AtEnd(gr Event) {
+	fmt.Println("hello at end : " + gr.Greeter.Greet())
 }
 
 type Message string
@@ -40,12 +42,16 @@ type Event struct {
 	Greeter Greeter
 }
 
-func NewEvent(g Greeter) {
+func NewEvent(g Greeter) Event {
 	fmt.Println(g.Greet())
+	return Event{
+		Greeter: g,
+	}
 }
 
 func TestLoadDependencies(t *testing.T) {
-	if err := ioc.LoadDependencies(); err != nil {
+	if err := container.LoadDependencies(); err != nil {
+		fmt.Println(err)
 		t.Fail()
 	}
 }

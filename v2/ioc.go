@@ -10,11 +10,16 @@ import (
 	"github.com/heimdalr/dag"
 )
 
-var graph = dag.NewDAG()
-var errs []error
-
 type dependency any
 type constructor any
+
+type iocContainer struct {
+	graph                  *dag.DAG
+	errs                   []error
+	dependencyContainerMap map[string]container
+	orderedDependencyKeys  []string
+	atEndConstructor       *container
+}
 
 type container struct {
 	id                    string
@@ -23,45 +28,52 @@ type container struct {
 	dependency            dependency
 }
 
+// New creates a new instance of the Container.
+func New() *iocContainer {
+	return &iocContainer{
+		graph:                  dag.NewDAG(),
+		errs:                   []error{},
+		dependencyContainerMap: make(map[string]container),
+		orderedDependencyKeys:  []string{},
+		atEndConstructor:       nil,
+	}
+}
+
 type visitor struct {
+	orderedDependencyKeys *[]string
 }
 
 func (v visitor) Visit(vertex dag.Vertexer) {
 	_, key := vertex.Vertex()
-	orderedDependencyKeys = append(orderedDependencyKeys, key.(string))
+	*v.orderedDependencyKeys = append(*v.orderedDependencyKeys, key.(string))
 }
 
-var dependencyContainerMap = make(map[string]container)
-var orderedDependencyKeys []string
-
-var registryAtEndCalled bool
-
 // Registry registers a constructor and its dependencies.
-func Registry(vertex constructor, edges ...constructor) {
+func (c *iocContainer) Registry(vertex constructor, edges ...constructor) {
 	constructorKey, err := getConstructorKey(vertex)
 
 	if err != nil {
-		errs = append(errs, err)
+		c.errs = append(c.errs, err)
 		return
 	}
 
-	if dependencyContainerMap[constructorKey].constructor != nil {
+	if c.dependencyContainerMap[constructorKey].constructor != nil {
 		panic(fmt.Errorf("constructor already registered: %v", constructorKey))
 	}
 
 	constructorType := reflect.TypeOf(vertex)
 	if constructorType.Kind() != reflect.Func {
-		errs = append(errs, err)
+		c.errs = append(c.errs, err)
 		return
 	}
 
-	id, err := graph.AddVertex(constructorKey)
+	id, err := c.graph.AddVertex(constructorKey)
 	if err != nil {
-		errs = append(errs, err)
+		c.errs = append(c.errs, err)
 		return
 	}
 
-	dependencyContainerMap[constructorKey] = container{
+	c.dependencyContainerMap[constructorKey] = container{
 		id:                    id,
 		constructor:           vertex,
 		constructorParameters: edges,
@@ -69,56 +81,43 @@ func Registry(vertex constructor, edges ...constructor) {
 }
 
 // RegistryAtEnd registers a constructor to be initialized at the end of all other dependencies.
-// It is primarily designed for the initialization of the installed HTTP server.
-// This function can only be called once.
-func RegistryAtEnd(vertex constructor, edges ...constructor) {
-	if registryAtEndCalled {
+func (c *iocContainer) RegistryAtEnd(vertex constructor, edges ...constructor) {
+	if c.atEndConstructor != nil {
 		panic("RegistryAtEnd can only be called once")
 	}
 
-	Registry(vertex, edges...)
-
-	registryAtEndCalled = true
-}
-
-// getConstructorKey generates a unique key for a constructor.
-func getConstructorKey(constructor constructor) (string, error) {
-	funcValue := reflect.ValueOf(constructor)
-
-	if funcPtr := funcValue.Pointer(); funcPtr != 0 {
-		funcForPC := runtime.FuncForPC(funcPtr)
-		if funcForPC != nil {
-			funcName := funcForPC.Name()
-
-			parts := strings.Split(funcName, "/")
-			lastPart := parts[len(parts)-1]
-			subParts := strings.SplitN(lastPart, ".", 2)
-
-			packageName := strings.Join(parts[:len(parts)-1], "/") + "/" + subParts[0]
-			functionName := subParts[1]
-
-			return packageName + "." + functionName, nil
-		}
+	constructorKey, err := getConstructorKey(vertex)
+	if err != nil {
+		panic(err)
 	}
-	return "", errors.New("constructor key can't be empty")
+
+	c.atEndConstructor = &container{
+		id:                    constructorKey,
+		constructor:           vertex,
+		constructorParameters: edges,
+	}
 }
 
 // LoadDependencies initializes all registered dependencies in the correct order.
-func LoadDependencies() error {
-	for _, v := range errs {
+func (c *iocContainer) LoadDependencies() error {
+	// Primero, procesar cualquier error acumulado
+	for _, v := range c.errs {
 		return v
 	}
-	for _, v := range dependencyContainerMap {
+
+	// Construir el grafo de dependencias y ordenar las claves de los constructores
+	for _, v := range c.dependencyContainerMap {
 		for _, z := range v.constructorParameters {
-			c := getContainer(z)
-			graph.AddEdge(v.id, c.id)
+			ctnr := c.getContainer(z)
+			c.graph.AddEdge(v.id, ctnr.id)
 		}
 	}
-	graph.OrderedWalk(visitor{})
+	c.graph.OrderedWalk(visitor{orderedDependencyKeys: &c.orderedDependencyKeys})
 
-	for i := len(orderedDependencyKeys) - 1; i >= 0; i-- {
-		key := orderedDependencyKeys[i]
-		ctnr := dependencyContainerMap[key]
+	// Ejecutar los constructores en el orden correcto
+	for i := len(c.orderedDependencyKeys) - 1; i >= 0; i-- {
+		key := c.orderedDependencyKeys[i]
+		ctnr := c.dependencyContainerMap[key]
 		value := reflect.ValueOf(ctnr.constructor)
 		if err := dependencyRulesGuardClause(key, value); err != nil {
 			return err
@@ -126,7 +125,7 @@ func LoadDependencies() error {
 		var args []reflect.Value
 
 		for _, constructorParameter := range ctnr.constructorParameters {
-			dependency, err := get(constructorParameter)
+			dependency, err := c.get(constructorParameter)
 			if err != nil {
 				return err
 			}
@@ -141,18 +140,44 @@ func LoadDependencies() error {
 			return err
 		}
 
-		container := dependencyContainerMap[key]
+		container := c.dependencyContainerMap[key]
 		if len(result) != 0 {
 			container.dependency = result[0].Interface()
 		}
-		dependencyContainerMap[key] = container
+		c.dependencyContainerMap[key] = container
 	}
+
+	// Ejecutar el constructor registrado al final si existe
+	if c.atEndConstructor != nil {
+		endValue := reflect.ValueOf(c.atEndConstructor.constructor)
+		var endArgs []reflect.Value
+
+		for _, constructorParameter := range c.atEndConstructor.constructorParameters {
+			dependency, err := c.get(constructorParameter)
+			if err != nil {
+				return err
+			}
+			endArgs = append(endArgs, reflect.ValueOf(dependency))
+		}
+
+		if err := validArgumentsGuardClause(c.atEndConstructor.id, endValue, endArgs); err != nil {
+			return err
+		}
+		result := endValue.Call(endArgs)
+		if err := resultRulesGuardClause(c.atEndConstructor.id, result); err != nil {
+			return err
+		}
+		if len(result) != 0 {
+			c.atEndConstructor.dependency = result[0].Interface()
+		}
+	}
+
 	return nil
 }
 
-func getContainer(c constructor) container {
-	constructorKey, _ := getConstructorKey(c)
-	return dependencyContainerMap[constructorKey]
+func (c *iocContainer) getContainer(constructor constructor) container {
+	constructorKey, _ := getConstructorKey(constructor)
+	return c.dependencyContainerMap[constructorKey]
 }
 
 func dependencyRulesGuardClause(key string, value reflect.Value) error {
@@ -230,14 +255,35 @@ func resultRulesGuardClause(key string, result []reflect.Value) error {
 	return nil
 }
 
-func get(c constructor) (dependency, error) {
-	constructorKey, err := getConstructorKey(c)
+func (c *iocContainer) get(constructor constructor) (dependency, error) {
+	constructorKey, err := getConstructorKey(constructor)
 	if err != nil {
 		return nil, err
 	}
-	dependency := dependencyContainerMap[constructorKey].dependency
+	dependency := c.dependencyContainerMap[constructorKey].dependency
 	if dependency != nil {
 		return dependency, nil
 	}
 	return nil, errors.New(constructorKey + " dependency is not present")
+}
+
+func getConstructorKey(constructor constructor) (string, error) {
+	funcValue := reflect.ValueOf(constructor)
+
+	if funcPtr := funcValue.Pointer(); funcPtr != 0 {
+		funcForPC := runtime.FuncForPC(funcPtr)
+		if funcForPC != nil {
+			funcName := funcForPC.Name()
+
+			parts := strings.Split(funcName, "/")
+			lastPart := parts[len(parts)-1]
+			subParts := strings.SplitN(lastPart, ".", 2)
+
+			packageName := strings.Join(parts[:len(parts)-1], "/") + "/" + subParts[0]
+			functionName := subParts[1]
+
+			return packageName + "." + functionName, nil
+		}
+	}
+	return "", errors.New("constructor key can't be empty")
 }
