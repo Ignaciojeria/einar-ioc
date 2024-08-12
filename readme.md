@@ -3,18 +3,18 @@
 ## 🔧 Installation
 To install ioc, use the following command:
 
-    go get github.com/Ignaciojeria/einar-ioc@v1.13.0
+    go get github.com/Ignaciojeria/einar-ioc/v2
 
 ## 👨‍💻 Example
 
 ```go
-package ioc
+package main
 
 import (
 	"fmt"
-	"testing"
+	"os"
 
-	ioc "github.com/Ignaciojeria/einar-ioc"
+	ioc "github.com/Ignaciojeria/einar-ioc/v2"
 )
 
 func init() {
@@ -22,7 +22,9 @@ func init() {
 	ioc.Registry(NewMessage)
 	ioc.Registry(NewGreeter, NewMessage)
 	ioc.Registry(NewEvent, NewGreeter)
+	ioc.Registry(SendGreetFromEvent, NewEvent)
 	/* this works too
+	ioc.Registry(SendGreetFromEvent, NewEvent)
 	ioc.Registry(NewGreeter, NewMessage)
 	ioc.Registry(NewEvent, NewGreeter)
 	ioc.Registry(NewMessage)
@@ -59,12 +61,13 @@ func (e Event) SendGreet() Message {
 	return e.Greeter.Greet()
 }
 
-func TestLoadDependencies(t *testing.T) {
+func SendGreetFromEvent(e Event) {
+	fmt.Println(e.Greeter.Greet())
+}
+
+func main() {
 	if err := ioc.LoadDependencies(); err != nil {
-		t.Log(err)
-		t.Fail()
+		os.Exit(0)
 	}
-	event := ioc.Get[Event](NewEvent)
-	fmt.Println(event.SendGreet())
 }
 ```
